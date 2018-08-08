@@ -451,7 +451,16 @@ REM POPD
 CALL:print %debug% "Copying pdbs from %libsSourcePath%obj to %destinationPath%"
 
 PUSHD %libsSourcePath%obj
-FOR /f %%A IN ('forfiles -p %libsSourcePath%obj /s /m *.pdb /c "CMD /c ECHO @relpath"') DO ( SET temp=%%~A && IF "!temp!"=="!temp:protobuf_full_do_not_use=!" COPY %%~A %destinationPath% >NUL )
+
+set numFiles=0
+for /r %%x in (*.pdb) do set /a numFiles+=1
+:: echo numFiles *.pdb files %numFiles% 
+IF %numFiles% NEQ 0 ( 
+  FOR /f %%A IN ('forfiles -p %libsSourcePath%obj /s /m *.pdb /c "CMD /c ECHO @relpath"') DO ( SET temp=%%~A && IF "!temp!"=="!temp:protobuf_full_do_not_use=!" COPY %%~A %destinationPath% >NUL )
+) ELSE (
+  CALL:print %warning% "There are %numFiles% *.pdb files"
+)
+
 POPD
 
 REM IF ERRORLEVEL 1 CALL:error 0 "Failed copying pdb files"
